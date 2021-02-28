@@ -103,6 +103,11 @@ class ViewController: NSViewController {
         let interpolatedResults = SignalProcessing.interpolate(current: rmsValue, previous: prevRMSValue)
         prevRMSValue = rmsValue
         
+        //pass values to the auiovisualizer for the rendering
+        for rms in interpolatedResults {
+            audioVisualizer.loudnessMagnitude = rms
+        }
+        
         //fft
         let fftMagnitudes = SignalProcessing.fft(data: channelData, setup: fftSetup!)
     }

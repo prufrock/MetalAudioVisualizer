@@ -17,11 +17,12 @@ struct VertexOut {
 };
 
 
-vertex VertexOut vertexShader(const constant vector_float2 *vertexArray [[buffer(0)]], unsigned int vid [[vertex_id]]){
+vertex VertexOut vertexShader(const constant vector_float2 *vertexArray [[buffer(0)]], const constant float *loudnessUniform [[buffer(1)]], unsigned int vid [[vertex_id]]){
     vector_float2 currentVertex = vertexArray[vid]; //fetch the current vertex we're on using the vid to index into our buffer data which holds all of our vertex points that we passed in
+    float circleScaler = loudnessUniform[0];
     VertexOut output;
     
-    output.pos = vector_float4(currentVertex.x, currentVertex.y, 0, 1); //populate the output position with the x and y values of our input vertex data
+    output.pos = vector_float4(currentVertex.x*circleScaler, currentVertex.y*circleScaler, 0, 1); //populate the output position with the x and y values of our input vertex data
     output.color = vector_float4(1,1,1,1);//set the color
     
     return output;

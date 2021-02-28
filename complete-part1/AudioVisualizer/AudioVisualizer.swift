@@ -21,6 +21,14 @@ class AudioVisualizer: NSView {
     //MARK: VERTEX VARS
     private var circleVertices = [simd_float2]()
     private var vertexBuffer : MTLBuffer!
+    
+    private var loudnessUniformBuffer: MTLBuffer!
+    public var loudnessMagnitude: Float = 0.3 {
+        didSet{
+            loudnessUniformBuffer = metalDevice.makeBuffer(bytes: &loudnessMagnitude, length: MemoryLayout<Float>.stride, options: [])
+            metalView.draw()
+        }
+    }
 
     //MARK: INIT
     public required init() {
@@ -68,6 +76,9 @@ class AudioVisualizer: NSView {
         //turn the vertex points into buffer data
         vertexBuffer = metalDevice.makeBuffer(bytes: circleVertices, length: circleVertices.count * MemoryLayout<simd_float2>.stride, options: [])!
         
+        //initialize the frequencyBuffer data
+        loudnessUniformBuffer = metalDevice.makeBuffer(bytes: &loudnessMagnitude, length: MemoryLayout<Float>.stride, options: [])
+        
         //draw
         metalView.needsDisplay = true
     }
@@ -104,7 +115,6 @@ class AudioVisualizer: NSView {
             }
         }
     }
-    
 }
 
 extension AudioVisualizer : MTKViewDelegate {
@@ -128,6 +138,7 @@ extension AudioVisualizer : MTKViewDelegate {
         
         /*********** Encoding the commands **************/
         renderEncoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
+        renderEncoder.setVertexBuffer(loudnessUniformBuffer, offset: 0, index: 1)
         renderEncoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 1081)
         
         renderEncoder.endEncoding()
