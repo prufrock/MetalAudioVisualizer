@@ -29,6 +29,15 @@ class AudioVisualizer: NSView {
             metalView.draw()
         }
     }
+    
+    private var frequencyBuffer: MTLBuffer!
+    public var frequencyVertices: [Float] = [Float](repeating: 0, count: 361) {
+        didSet {
+            let sliced = Array(frequencyVertices[76..<438])
+            frequencyBuffer = metalDevice.makeBuffer(bytes: sliced, length: sliced.count * MemoryLayout<Float>.stride, options: [])!
+            metalView.draw()
+        }
+    }
 
     //MARK: INIT
     public required init() {
@@ -79,6 +88,9 @@ class AudioVisualizer: NSView {
         //initialize the frequencyBuffer data
         loudnessUniformBuffer = metalDevice.makeBuffer(bytes: &loudnessMagnitude, length: MemoryLayout<Float>.stride, options: [])
         
+        //initialize the frequencyBuffer data
+        frequencyBuffer = metalDevice.makeBuffer(bytes: frequencyVertices, length: frequencyVertices.count * MemoryLayout<Float>.stride, options: [])
+        
         //draw
         metalView.needsDisplay = true
     }
@@ -128,7 +140,7 @@ extension AudioVisualizer : MTKViewDelegate {
         //Creating the interface for the pipeline
         guard let renderDescriptor = view.currentRenderPassDescriptor else {return}
         //Setting a "background color"
-        renderDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 1, 1)
+        renderDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 1)
         
         //Creating the command encoder, or the "inside" of the pipeline
         guard let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderDescriptor) else {return}
@@ -139,7 +151,9 @@ extension AudioVisualizer : MTKViewDelegate {
         /*********** Encoding the commands **************/
         renderEncoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
         renderEncoder.setVertexBuffer(loudnessUniformBuffer, offset: 0, index: 1)
+        renderEncoder.setVertexBuffer(frequencyBuffer, offset: 0, index: 2)
         renderEncoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 1081)
+        renderEncoder.drawPrimitives(type: .lineStrip, vertexStart: 1081, vertexCount: 1081)
         
         renderEncoder.endEncoding()
         commandBuffer.present(view.currentDrawable!)

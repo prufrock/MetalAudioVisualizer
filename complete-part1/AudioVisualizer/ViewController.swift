@@ -110,6 +110,7 @@ class ViewController: NSViewController {
         
         //fft
         let fftMagnitudes = SignalProcessing.fft(data: channelData, setup: fftSetup!)
+        audioVisualizer.frequencyVertices = fftMagnitudes
     }
 }
 
