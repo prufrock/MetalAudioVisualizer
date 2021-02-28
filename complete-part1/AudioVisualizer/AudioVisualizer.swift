@@ -70,7 +70,7 @@ class AudioVisualizer: NSView {
         
         //updates
         metalView.isPaused = true
-        metalView.enableSetNeedsDisplay = true
+        metalView.enableSetNeedsDisplay = false
         
         //connect to the gpu
         metalDevice = MTLCreateSystemDefaultDevice()!
@@ -92,7 +92,7 @@ class AudioVisualizer: NSView {
         frequencyBuffer = metalDevice.makeBuffer(bytes: frequencyVertices, length: frequencyVertices.count * MemoryLayout<Float>.stride, options: [])
         
         //draw
-        metalView.needsDisplay = true
+        metalView.draw()
     }
     
     fileprivate func createPipelineState(){

@@ -37,7 +37,7 @@ vertex VertexOut vertexShader(
         if(circleId%3 == 0){
             //place line vertex off circle
             circleVertex = vertexArray[circleId];
-            float lineScale = 1 + lineArray[(vid-1081/3)];
+            float lineScale = 1 + lineArray[(vid-1081)/3];
             output.pos = vector_float4(circleVertex.x*circleScaler*lineScale, circleVertex.y*circleScaler*lineScale, 0, 1);
             output.color = vector_float4(0,0,1,1);
         } else {

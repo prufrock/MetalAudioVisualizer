@@ -18,7 +18,7 @@ class SignalProcessing {
         // adjust to +0.3 scale
         db = 160 + db //inverse dB to +ve range where 0(silent) -> 160(loudest)
         db = db - 120 //Only take into account range from 120->160, so FSR = 40
-        let dividor = Float(160/0.3)
+        let dividor = Float(40/0.3)
         var adjustedVal = 0.3 + db/dividor
         
         //cutoff
