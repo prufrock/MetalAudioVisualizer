@@ -10,20 +10,17 @@ import Cocoa
 import Accelerate
 
 class SignalProcessing {
-    
     static func rms(data: UnsafeMutablePointer<Float>, frameLength: UInt) -> Float {
-        var val : Float = 0
+        var val: Float = 0
         vDSP_measqv(data, 1, &val, frameLength)
-
-        var db = 10*log10f(val)
-        //inverse dB to +ve range where 0(silent) -> 160(loudest)
-        db = 160 + db;
-        //Only take into account range from 120->160, so FSR = 40
-        db = db - 120
-
-        let dividor = Float(40/0.3)
+        var db = 10*log10f(val) // convert to decibels
+        
+        // adjust to +0.3 scale
+        db = 160 + db //inverse dB to +ve range where 0(silent) -> 160(loudest)
+        db = db - 120 //Only take into account range from 120->160, so FSR = 40
+        let dividor = Float(160/0.3)
         var adjustedVal = 0.3 + db/dividor
-
+        
         //cutoff
         if (adjustedVal < 0.3) {
             adjustedVal = 0.3
@@ -34,6 +31,23 @@ class SignalProcessing {
         return adjustedVal
     }
     
+    static func interpolate(current: Float, previous: Float) -> [Float] {
+        var vals = [Float](repeating: 0, count: 11)
+        vals[10] = current
+        vals[5] = (current + previous)/2
+        vals[2] = (vals[5] + previous)/2
+        vals[1] = (vals[2] + previous)/2
+        vals[8] = (vals[5] + current)/2
+        vals[9] = (vals[10] + current)/2
+        vals[7] = (vals[5] + vals[9])/2
+        vals[6] = (vals[5] + vals[7])/2
+        vals[3] = (vals[1] + vals[5])/2
+        vals[4] = (vals[3] + vals[5])/2
+        vals[0] = (previous + vals[1])/2
+        
+        return vals
+    }
+    
     static func fft(data: UnsafeMutablePointer<Float>, setup: OpaquePointer) -> [Float] {
         //output setup
         var realIn = [Float](repeating: 0, count: 1024)
@@ -42,13 +56,12 @@ class SignalProcessing {
         var imagOut = [Float](repeating: 0, count: 1024)
         
         //fill in real input part with audio samples
-        for i in 0...1023 {
+        for i in 0...1023{
             realIn[i] = data[i]
         }
-    
         
         vDSP_DFT_Execute(setup, &realIn, &imagIn, &realOut, &imagOut)
-
+        
         //our results are now inside realOut and imagOut
         
         //package it inside a complex vector representation used in the vDSP framework
@@ -66,22 +79,5 @@ class SignalProcessing {
         vDSP_vsmul(&magnitudes, 1, &scalingFactor, &normalizedMagnitudes, 1, 512)
         
         return normalizedMagnitudes
-    }
-    
-    static func interpolate(current: Float, previous: Float) -> [Float]{
-        var vals = [Float](repeating: 0, count: 11)
-        vals[10] = current
-        vals[5] = (current + previous)/2
-        vals[2] = (vals[5] + previous)/2
-        vals[1] = (vals[2] + previous)/2
-        vals[8] = (vals[5] + current)/2
-        vals[9] = (vals[10] + current)/2
-        vals[7] = (vals[5] + vals[9])/2
-        vals[6] = (vals[5] + vals[7])/2
-        vals[3] = (vals[1] + vals[5])/2
-        vals[4] = (vals[3] + vals[5])/2
-        vals[0] = (previous + vals[1])/2
-        
-        return vals
     }
 }

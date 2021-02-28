@@ -5,14 +5,15 @@
 //  Created by Alex Barbulescu on 2019-04-06.
 //  Copyright © 2019 alex. All rights reserved.
 //
+// Source: https://betterprogramming.pub/audio-visualization-in-swift-using-metal-accelerate-part-1-390965c095d7
 
 import Cocoa
 import AVFoundation
 import Accelerate
 
 class ViewController: NSViewController {
-    var engine : AVAudioEngine!
-    var audioVisualizer : AudioVisualizer!
+    var engine: AVAudioEngine!
+    var audioVisualizer: AudioVisualizer!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,7 +35,7 @@ class ViewController: NSViewController {
         //initialize it
         engine = AVAudioEngine()
         
-        //initialzing the mainMixerNode singleton which will connect to the default output node
+        //initializing the mainMixerNode singleton which will connect to the default output node
         _ = engine.mainMixerNode
         
         //prepare and start
@@ -60,10 +61,9 @@ class ViewController: NSViewController {
             //player nodes have a few ways to play-back music, the easiest way is from an AVAudioFile
             let audioFile = try AVAudioFile(forReading: url)
             
-            //audio always has a format, lets keep track of what the format is as an AVAudioFormat
+            //audio always has a format, lets keep track of what the format is an and AVAudioFormat
             let format = audioFile.processingFormat
-            print(format)
-            
+                        
             //we now need to connect add the node to our engine. This part is a little weird but we first need
             //to attach it to the engine itself before connecting it to the mainMixerNode. Recall that the
             //mainMixerNode connects to the default outputNode, so now we'll have a complete playback path from
@@ -94,17 +94,17 @@ class ViewController: NSViewController {
     //fft setup object for 1024 values going forward (time domain -> frequency domain)
     let fftSetup = vDSP_DFT_zop_CreateSetup(nil, 1024, vDSP_DFT_Direction.FORWARD)
 
-    func processAudioData(buffer: AVAudioPCMBuffer){
+    func processAudioData(buffer: AVAudioPCMBuffer) {
         guard let channelData = buffer.floatChannelData?[0] else {return}
         let frames = buffer.frameLength
         
-        //rms
         let rmsValue = SignalProcessing.rms(data: channelData, frameLength: UInt(frames))
+        // linear interpolation`1
         let interpolatedResults = SignalProcessing.interpolate(current: rmsValue, previous: prevRMSValue)
         prevRMSValue = rmsValue
         
         //fft
-        let fftMagnitudes =  SignalProcessing.fft(data: channelData, setup: fftSetup!)
+        let fftMagnitudes = SignalProcessing.fft(data: channelData, setup: fftSetup!)
     }
 }
 
