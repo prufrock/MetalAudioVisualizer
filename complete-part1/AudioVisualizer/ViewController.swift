@@ -5,7 +5,11 @@
 //  Created by Alex Barbulescu on 2019-04-06.
 //  Copyright © 2019 alex. All rights reserved.
 //
-// Source: https://betterprogramming.pub/audio-visualization-in-swift-using-metal-accelerate-part-1-390965c095d7
+// Source:
+// https://betterprogramming.pub/making-your-first-circle-using-metal-shaders-1e5049ec8505
+// https://betterprogramming.pub/audio-visualization-in-swift-using-metal-accelerate-part-1-390965c095d7
+// https://betterprogramming.pub/audio-visualization-in-swift-using-metal-accelerate-part-2-7ec8df4def91
+// https://github.com/barbulescualex/MetalAudioVisualizer
 
 import Cocoa
 import AVFoundation
